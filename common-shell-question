@@ -1,0 +1,154 @@
+1) Shebang #!/bin/bash
+
+Your idea: Correct.
+
+Interview-perfect answer:
+
+Shebang is the first line in a script that tells the OS which interpreter to use to execute the file.
+#!/bin/bash means run this script using the Bash shell.
+
+Improve
+
+Say “kernel uses this to choose interpreter”.
+Mention it must be first line.
+2) Positional parameters $1, $2, $@, $#, $?
+
+Mostly correct. Add precision:
+
+Interview-perfect answer:
+
+$1, $2 … → positional arguments
+$@ → all arguments as separate quoted items
+$# → number of arguments
+$? → exit status of previous command
+
+Important improvement
+
+Difference between $@ and $* (very commonly asked)
+
+$@ → preserves each argument
+$* → treats all as single string
+3) Check file / directory exists
+
+Your syntax slightly wrong.
+
+Correct:
+
+[ -f "$filename" ]   # file
+[ -d "$dirname" ]    # directory
+
+Improve
+
+Always quote variables.
+No $() here.
+4) Read file line by line (very common question)
+
+Answer they expect:
+
+while IFS= read -r line
+do
+  echo "$line"
+done < file.txt
+
+Why this version?
+
+IFS= preserves spaces
+-r avoids backslash escaping
+5) grep / awk / sed
+
+Good idea, refine wording:
+
+grep → search patterns
+awk → column/field processing & reporting
+sed → stream editor for modify/replace/delete
+
+Improve
+Say: “used for powerful text processing in pipelines”.
+
+6) Redirect stdout & stderr
+
+Your command works but explanation needs clarity.
+
+Interview answer:
+
+command > file 2>&1
+
+Redirect stdout to file, and stderr to wherever stdout is going.
+
+Also mention shortcut:
+
+command &> file
+7) Cron job
+
+Improve wording:
+
+crontab -e
+
+Example:
+
+*/5 * * * * /path/script.sh >> out.log 2>&1
+
+Say: “5 time fields: min hour dom mon dow”.
+
+8) Process command-line args
+
+Don’t say only $1 to $9.
+
+Better:
+
+Use $@ in loops
+Use getopts for flags (advanced point = impresses)
+9) Exit status $?
+
+Correct. Add:
+
+0 = success, non-zero = failure (convention in Unix)
+
+10) Log rotate script (most important)
+
+Your logic is good but many interview mistakes.
+
+❌ Issues
+$filePath vs $filepath mismatch
+Unquoted variables
+date syntax wrong
+truncate wrong variable
+aws sns publish incomplete
+Missing argument check
+✅ Interview-ready version
+#!/bin/bash
+set -e
+
+filePath="$1"
+threshold=$((100*1024*1024))
+
+if [ -z "$filePath" ] || [ ! -f "$filePath" ]; then
+  echo "Usage: $0 <file>"
+  exit 1
+fi
+
+actualSize=$(stat -c %s "$filePath")
+
+if [ "$actualSize" -ge "$threshold" ]; then
+  backup="${filePath}_$(date +'%Y%m%d_%H%M%S')"
+
+  cp "$filePath" "$backup"
+  : > "$filePath"   # truncate safely
+
+  echo "Rotated: $backup"
+
+  # Example alert
+  # aws sns publish --topic-arn <arn> --message "Log rotated $backup"
+fi
+⭐ Improvement points interviewer loves
+: > file instead of truncate
+quotes everywhere
+backup filename variable
+proper date format
+usage message
+Overall feedback
+
+You understand concepts ✅
+You need to improve syntax precision and professional wording.
+
+That’s exactly what interviewers test in shell.
